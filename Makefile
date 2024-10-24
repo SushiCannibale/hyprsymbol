@@ -1,8 +1,8 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Wvla -std=c99 -g3 `pkg-config --cflags gtk4`
-LDLIBS=`pkg-config --libs gtk4`
+CFLAGS=-Wall -Wextra -Wvla -std=c99 -g3
+LDLIBS=`pkg-config --libs wayland-client`
 
-SRC=src/main.c src/hyprsymbol.c
+SRC=src/main.c
 TESTS=
 LIB=
 
