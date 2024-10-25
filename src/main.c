@@ -21,6 +21,11 @@ int main() {
 	}
 
 	fprintf(stdout, "Successfully connected to Wayland display\n");
+	while (wl_display_dispatch() != -1) {
+		
+	}
+
+
 	wl_display_disconnect(display);
 	return 0;
 }
