@@ -1,3 +1,7 @@
+# Self-generated
+include/
+lib/
+
 # Prerequisites
 *.d
 
