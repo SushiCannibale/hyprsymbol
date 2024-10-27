@@ -6,6 +6,7 @@ Do not despair, I promise I will continue to update it :3
 
 [^1]: Just kidding, you can't
 
+---
 
 ### If you still want to try it out
 First, run `git clone git@github.com:SushiCannibale/hyprsymbol.git` to clone the repo.
