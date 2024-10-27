@@ -16,7 +16,7 @@
 #include "xdg-shell.h"
 #include <wayland-client.h>
 
-struct wl_buffer *create_shm_buffer(unsigned char **data, int width, int height) {
+struct wl_buffer *create_shm_buffer(uint32_t **data, int width, int height) {
 	int size = width * height * 4;
 	int stride = width * 4;
 
@@ -58,7 +58,7 @@ int main() {
     wl_display_roundtrip(display);
 
     if (glob_compositor == NULL || glob_shm == NULL || glob_xdg_wm == NULL) {
-		fprintf(stderr, "compositor | shm | xdg_wm gloal(s) unsupported");
+		fprintf(stderr, "compositor, shm or xdg_wm gloal(s) undefined");
     	return 1;
     }
 
@@ -66,17 +66,18 @@ int main() {
     surface = wl_compositor_create_surface(glob_compositor);
     struct xdg_surface *xdg_surface = xdg_wm_base_get_xdg_surface(glob_xdg_wm, surface);
     xdg_surface_add_listener(xdg_surface, &xdg_surface_listener, NULL);
-    xdg_surface_get_toplevel(xdg_surface);
 
+    struct xdg_toplevel *xdg_toplevel = xdg_surface_get_toplevel(xdg_surface);
+	
 	/* Initial commit before surface attachment, as required */	
     wl_surface_commit(surface);
 
-    while (wl_display_dispatch(display) != -1) {
-    	/* TODO: move thins in a proper event handler */
+   	/* TODO: move this in a proper event handler */
+    while (wl_display_dispatch(display) != -1 && !configured) {
 		/* waits for xdg_surface_configure event */
-    	if (pixels != NULL) {
-    		break;
-    	}
+    	// if (buffer != NULL) {
+    	// 	break;
+    	// }
     }
 
 	/* Creates the buffer and attach it to the surface */
@@ -85,12 +86,26 @@ int main() {
 		/* Cannot create buffer */
     	return 1;
     }
+
+	/* Fills the buffer with something (just to see) */
+	memset(pixels, 0, 200 * 200 * 4);
+	// for (int y = 0; y < 200; ++y) {
+	//   for (int x = 0; x < 200; ++x) {
+	//     if ((x + y / 8 * 8) % 16 < 8) {
+	//       pixels[y * 200 + x] = 0xFF666666;
+	//     } else {
+	//       pixels[y * 200 + x] = 0xFFEEEEEE;
+	//     }
+	//   }
+	// }
+
     wl_surface_attach(surface, buffer, 0, 0);
+    wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
     wl_surface_commit(surface);
 
 	while (wl_display_dispatch(display) != -1) { }
 
-	// xdg_toplevel_destroy();
+	xdg_toplevel_destroy(xdg_toplevel);
 	xdg_surface_destroy(xdg_surface);
 	wl_surface_destroy(surface);
     wl_display_disconnect(display);

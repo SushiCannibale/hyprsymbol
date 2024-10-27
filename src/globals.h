@@ -1,6 +1,8 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <stdint.h>
+
 #include <wayland-client.h>
 #include "xdg-shell.h"
 
@@ -11,6 +13,8 @@ extern struct xdg_wm_base *glob_xdg_wm;
 
 extern struct wl_buffer *buffer;
 extern struct wl_surface *surface;
+extern int configured;
 
-extern unsigned char *pixels;
+/* 4*8 bytes pixels */
+extern uint32_t *pixels;
 #endif /* !GLOBALS_H */

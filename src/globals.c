@@ -9,4 +9,6 @@ struct xdg_wm_base *glob_xdg_wm       = NULL;
 /* Client's objects */
 struct wl_buffer *buffer              = NULL;
 struct wl_surface *surface            = NULL;
-unsigned char *pixels                 = NULL;
+int configured                        = 0;
+
+uint32_t *pixels                 = NULL;

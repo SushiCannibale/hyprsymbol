@@ -47,9 +47,10 @@ void xdg_surface_configure_handler
 	uint32_t serial
 ) {
 	xdg_surface_ack_configure(xdg_surface, serial);
-	if (pixels != NULL) {
+	if (configured) {
 		wl_surface_commit(surface);
+	} else {
+		configured = 1;
 	}
-
 	/* TODO: do the rendering after acknowledge, ending by a wl_surface_commit */
 }
