@@ -1,3 +1,4 @@
+
 #define _POSIX_C_SOURCE 200112L
 
 #include <stdlib.h>
@@ -13,7 +14,8 @@
 #include "handlers.h"
 #include "listeners.h"
 
-#include "xdg-shell.h"
+// #include "xdg-shell.h"
+#include "wlr-layer-shell-unstable-v1.h"
 #include <wayland-client.h>
 
 struct wl_buffer *create_shm_buffer(uint32_t **data, int width, int height) {
@@ -57,28 +59,29 @@ int main() {
     wl_registry_add_listener(registry, &registry_listener, NULL);
     wl_display_roundtrip(display);
 
-    if (glob_compositor == NULL || glob_shm == NULL || glob_xdg_wm == NULL) {
-		fprintf(stderr, "compositor, shm or xdg_wm gloal(s) undefined");
+    if (glob_compositor == NULL || glob_shm == NULL || glob_zwlr_layer_shell == NULL) {
+		fprintf(stderr, "compositor, shm or zwlr_layer_shell global(s) undefined");
     	return 1;
     }
 
 	/* Requests a wl_surface and convert it to a toplevel window */
     surface = wl_compositor_create_surface(glob_compositor);
-    struct xdg_surface *xdg_surface = xdg_wm_base_get_xdg_surface(glob_xdg_wm, surface);
-    xdg_surface_add_listener(xdg_surface, &xdg_surface_listener, NULL);
+    struct zwlr_layer_surface_v1 *zwlr_layer_surface = 
+	   	zwlr_layer_shell_v1_get_layer_surface(
+		   	glob_zwlr_layer_shell,
+		   	surface,
+		   	NULL,
+		   	ZWLR_LAYER_SHELL_V1_LAYER_TOP,
+			"=UwU="
+		);
+	zwlr_layer_surface_v1_set_anchor(zwlr_layer_surface, 1 | 2 | 4 | 8);
 
-    struct xdg_toplevel *xdg_toplevel = xdg_surface_get_toplevel(xdg_surface);
-	
+    zwlr_layer_surface_v1_add_listener(zwlr_layer_surface, &zwlr_layer_surface_listener, NULL);
 	/* Initial commit before surface attachment, as required */	
     wl_surface_commit(surface);
 
    	/* TODO: move this in a proper event handler */
-    while (wl_display_dispatch(display) != -1 && !configured) {
-		/* waits for xdg_surface_configure event */
-    	// if (buffer != NULL) {
-    	// 	break;
-    	// }
-    }
+    while (wl_display_dispatch(display) != -1 && !configured) { }
 
 	/* Creates the buffer and attach it to the surface */
     buffer = create_shm_buffer(&pixels, 200, 200);
@@ -99,14 +102,15 @@ int main() {
 	//   }
 	// }
 
-    wl_surface_attach(surface, buffer, 0, 0);
-    wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
-    wl_surface_commit(surface);
+	wl_surface_attach(surface, buffer, 0, 0);
+	wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
+	wl_surface_commit(surface);
 
 	while (wl_display_dispatch(display) != -1) { }
 
-	xdg_toplevel_destroy(xdg_toplevel);
-	xdg_surface_destroy(xdg_surface);
+	// xdg_toplevel_destroy(xdg_toplevel);
+	// xdg_surface_destroy(xdg_surface);
+	zwlr_layer_surface_v1_destroy(zwlr_layer_surface);
 	wl_surface_destroy(surface);
     wl_display_disconnect(display);
 	return 0;

@@ -17,9 +17,8 @@ void registry_global_handler
         glob_compositor = wl_registry_bind(registry, name, &wl_compositor_interface, 3);
     } else if (strcmp(interface, wl_shm_interface.name) == 0) {
         glob_shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
-    } else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
-        glob_xdg_wm = wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
-        xdg_wm_base_add_listener(glob_xdg_wm, &xdg_wm_base_listener, NULL);
+    } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
+        glob_zwlr_layer_shell = wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1);
     }
 }
 
@@ -28,29 +27,53 @@ void registry_global_remove_handler
     void *data,
     struct wl_registry *registry,
     uint32_t name
-) {}
+) { }
 
 
-void xdg_wm_base_ping_handler
+// void xdg_wm_base_ping_handler
+// (
+// 	void *data,
+// 	struct xdg_wm_base *xdg_wm_base,
+// 	uint32_t serial
+// ) {
+// 	xdg_wm_base_pong(xdg_wm_base, serial);	
+// }
+
+void zwlr_layer_surface_configure_handler
 (
 	void *data,
-	struct xdg_wm_base *xdg_wm_base,
-	uint32_t serial
+	struct zwlr_layer_surface_v1 *zwlr_layer_surface,
+	uint32_t serial,
+	uint32_t width,
+	uint32_t height
 ) {
-	xdg_wm_base_pong(xdg_wm_base, serial);	
-}
-
-void xdg_surface_configure_handler
-(
-	void *data,
-	struct xdg_surface *xdg_surface,
-	uint32_t serial
-) {
-	xdg_surface_ack_configure(xdg_surface, serial);
-	if (configured) {
-		wl_surface_commit(surface);
-	} else {
+	zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface, serial);
+	if (!configured) {
 		configured = 1;
 	}
-	/* TODO: do the rendering after acknowledge, ending by a wl_surface_commit */
+
+	wl_surface_commit(surface);
 }
+
+void zwlr_layer_surface_closed_handler
+(
+	void *data,
+	struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1
+) {
+	
+}
+
+// void xdg_surface_configure_handler
+// (
+// 	void *data,
+// 	struct xdg_surface *xdg_surface,
+// 	uint32_t serial
+// ) {
+// 	xdg_surface_ack_configure(xdg_surface, serial);
+// 	if (configured) {
+// 		wl_surface_commit(surface);
+// 	} else {
+// 		configured = 1;
+// 	}
+// 	/* TODO: do the rendering after acknowledge, ending by a wl_surface_commit */
+// }

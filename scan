@@ -1,0 +1,13 @@
+#!/bin/sh
+
+header_dir="include"
+lib_dir="lib"
+from_dir="protocols"
+
+IFS=''
+ls $from_dir | while read -r protocol; do
+	header=${protocol::-3}h
+	src=${protocol::-3}c
+	wayland-scanner client-header $from_dir/$protocol $header_dir/$header
+	wayland-scanner private-code  $from_dir/$protocol $lib_dir/$src
+done
