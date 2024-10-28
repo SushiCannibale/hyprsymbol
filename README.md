@@ -12,9 +12,9 @@ Do not despair, I promise I will continue to update it :3
 First, run `git clone git@github.com:SushiCannibale/hyprsymbol.git` to clone the repo.
 `cd` in it.
 
-[!NOTE]
-You can check that you are running a Wayland session with `echo $XDG_SESSION_TYPE`. 
-Doing this should output `wayland`.
+> [!NOTE]
+> You can check that you are running a Wayland session with `echo $XDG_SESSION_TYPE`. 
+> Doing this should output `wayland`.
 
 Then, check that you have installed `wayland-scanner`.
 (running `whereis wayland-scanner` should do the trick)
