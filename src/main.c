@@ -74,8 +74,9 @@ int main() {
 		   	ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY,
 			"=UwU="
 		);
-	zwlr_layer_surface_v1_set_size(zwlr_layer_surface, 0, 0);
-	zwlr_layer_surface_v1_set_anchor(zwlr_layer_surface, 1 | 2 | 4 | 8);
+	zwlr_layer_surface_v1_set_size(zwlr_layer_surface, 200, 200);
+	zwlr_layer_surface_v1_set_anchor(zwlr_layer_surface, 
+		ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 
     zwlr_layer_surface_v1_add_listener(zwlr_layer_surface, &zwlr_layer_surface_listener, NULL);
 	/* Initial commit before surface attachment, as required */	
