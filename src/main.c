@@ -71,9 +71,10 @@ int main() {
 		   	glob_zwlr_layer_shell,
 		   	surface,
 		   	NULL,
-		   	ZWLR_LAYER_SHELL_V1_LAYER_TOP,
+		   	ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY,
 			"=UwU="
 		);
+	zwlr_layer_surface_v1_set_size(zwlr_layer_surface, 0, 0);
 	zwlr_layer_surface_v1_set_anchor(zwlr_layer_surface, 1 | 2 | 4 | 8);
 
     zwlr_layer_surface_v1_add_listener(zwlr_layer_surface, &zwlr_layer_surface_listener, NULL);
@@ -92,18 +93,9 @@ int main() {
 
 	/* Fills the buffer with something (just to see) */
 	memset(pixels, 0, 200 * 200 * 4);
-	// for (int y = 0; y < 200; ++y) {
-	//   for (int x = 0; x < 200; ++x) {
-	//     if ((x + y / 8 * 8) % 16 < 8) {
-	//       pixels[y * 200 + x] = 0xFF666666;
-	//     } else {
-	//       pixels[y * 200 + x] = 0xFFEEEEEE;
-	//     }
-	//   }
-	// }
 
 	wl_surface_attach(surface, buffer, 0, 0);
-	wl_surface_damage(surface, 0, 0, UINT32_MAX, UINT32_MAX);
+	wl_surface_damage(surface, 0, 0, 200, 200);
 	wl_surface_commit(surface);
 
 	while (wl_display_dispatch(display) != -1) { }
