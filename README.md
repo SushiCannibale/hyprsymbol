@@ -1,25 +1,26 @@
 ### 🚧 Project still under development 🚧
-This project is still under high intensity development.
-Do not despair, I promise I will continue to update it :3
+This project is still under development.
+Do not despair, I promise I will give updates... Soon...
 
-- [ ] Check this box if you want to be notified for any update on this project[^1].
+## About the project
+Hyprsymbol is a tool created to quickly copy-paste emojis and other unicode symbols on your needs. This was highly inspired by the `CTRL + SHIFT + u` shortcut on[kitty](https://sw.kovidgoyal.net/kitty/).
 
-[^1]: Just kidding, you can't
+## Installation
+🚧 ... 🚧
 
----
+## Roadmap
+- [ ] EGL / Cairo graphic design
+- [ ] 
+- [ ] Config file
+- [ ] Styling file (the most important)
 
-### If you still want to try it out
-First, run `git clone git@github.com:SushiCannibale/hyprsymbol.git` to clone the repo.
-`cd` in it.
+## Contributing
+As always, feel free to fork the repo and open a pull request if you have any suggestion. Please keep in mind that I'm absolutely not an expert and mainly do this as myself to understand how the Wayland ecosystem functions.
 
+1. Fork the repo
 > [!NOTE]
-> You can check that you are running a Wayland session with `echo $XDG_SESSION_TYPE`. 
-> Doing this should output `wayland`.
+> You can check that you are running a Wayland session with `echo $XDG_SESSION_TYPE`.
 
-Then, check that you have installed `wayland-scanner`.
-(running `whereis wayland-scanner` should do the trick)
+2. Run `./scan` to generate the headers and glue code for the protocols. (you should have installed `wayland-scanner` in order to do this)
 
-Step three, type `./scan` to generate the sources from the prototypes.
-
-Finally, run `make` and execute `hyprsymbol` to be greeted by an empty,
-lonely, pointless black box... Y-Y
+3. Finally, run `make` to compile the project and generate the binary. 

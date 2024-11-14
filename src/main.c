@@ -11,11 +11,10 @@
 #include <fcntl.h>
 
 #include "globals.h"
-#include "handlers.h"
 #include "listeners.h"
 
 // #include "xdg-shell.h"
-#include "wlr-layer-shell-unstable-v1.h"
+#include "../include/wlr-layer-shell-unstable-v1.h"
 #include <wayland-client.h>
 
 struct wl_buffer *create_shm_buffer(uint32_t **data, int width, int height) {
@@ -59,16 +58,16 @@ int main() {
     wl_registry_add_listener(registry, &registry_listener, NULL);
     wl_display_roundtrip(display);
 
-    if (glob_compositor == NULL || glob_shm == NULL || glob_zwlr_layer_shell == NULL) {
+    if (glob_compositor == NULL || glob_shm == NULL || glob_layer_shell == NULL) {
 		fprintf(stderr, "compositor, shm or zwlr_layer_shell global(s) undefined");
     	return 1;
     }
 
-	/* Requests a wl_surface and convert it to a toplevel window */
+	/* Requests a wl_surface and convert it to a layered surface */
     surface = wl_compositor_create_surface(glob_compositor);
     struct zwlr_layer_surface_v1 *zwlr_layer_surface = 
 	   	zwlr_layer_shell_v1_get_layer_surface(
-		   	glob_zwlr_layer_shell,
+		   	glob_layer_shell,
 		   	surface,
 		   	NULL,
 		   	ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY,
@@ -88,12 +87,14 @@ int main() {
 	/* Creates the buffer and attach it to the surface */
     buffer = create_shm_buffer(&pixels, 200, 200);
     if (buffer == NULL) {
-		/* Cannot create buffer */
     	return 1;
     }
 
 	/* Fills the buffer with something (just to see) */
 	memset(pixels, 0, 200 * 200 * 4);
+	for (int i, j = 0; i < 200 && j < 200; i++, j++) {
+		pixels[i+j] = 0xFF00FFFF;
+	}
 
 	wl_surface_attach(surface, buffer, 0, 0);
 	wl_surface_damage(surface, 0, 0, 200, 200);

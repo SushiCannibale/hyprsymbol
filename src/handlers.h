@@ -1,7 +1,7 @@
 #ifndef HANDLERS_H
 #define HANDLERS_H
 
-#include "wlr-layer-shell-unstable-v1.h"
+#include "../include/wlr-layer-shell-unstable-v1.h"
 #include <wayland-client.h>
 
 void registry_global_handler

@@ -2,9 +2,11 @@
 
 #include <string.h>
 
-#include "listeners.h"
 #include "globals.h"
 
+/**
+ * Fetches the globals from the Compositor
+ */
 void registry_global_handler
 (
     void *data,
@@ -18,7 +20,7 @@ void registry_global_handler
     } else if (strcmp(interface, wl_shm_interface.name) == 0) {
         glob_shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
     } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
-        glob_zwlr_layer_shell = wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1);
+        glob_layer_shell = wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1);
     }
 }
 
@@ -29,15 +31,6 @@ void registry_global_remove_handler
     uint32_t name
 ) { }
 
-
-// void xdg_wm_base_ping_handler
-// (
-// 	void *data,
-// 	struct xdg_wm_base *xdg_wm_base,
-// 	uint32_t serial
-// ) {
-// 	xdg_wm_base_pong(xdg_wm_base, serial);	
-// }
 
 void zwlr_layer_surface_configure_handler
 (

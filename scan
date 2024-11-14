@@ -4,6 +4,14 @@ header_dir="include"
 lib_dir="lib"
 from_dir="protocols"
 
+if [ ! -d $from_dir ]; then
+	echo "'$from_dir' not found. Aborting." 0>&2
+	exit 1
+fi
+
+[ ! -d $header_dir ] && mkdir $header_dir
+[ ! -d $lib_dir ] && mkdir $lib_dir
+
 IFS=''
 ls $from_dir | while read -r protocol; do
 	header=${protocol::-3}h
@@ -11,3 +19,5 @@ ls $from_dir | while read -r protocol; do
 	wayland-scanner client-header $from_dir/$protocol $header_dir/$header
 	wayland-scanner private-code  $from_dir/$protocol $lib_dir/$src
 done
+
+exit 0

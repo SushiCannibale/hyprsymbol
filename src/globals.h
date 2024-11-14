@@ -4,11 +4,11 @@
 #include <stdint.h>
 
 #include <wayland-client.h>
-#include "wlr-layer-shell-unstable-v1.h"
+#include "../include/wlr-layer-shell-unstable-v1.h"
 
 extern struct wl_compositor *glob_compositor;
 extern struct wl_shm *glob_shm;
-extern struct zwlr_layer_shell_v1 *glob_zwlr_layer_shell;
+extern struct zwlr_layer_shell_v1 *glob_layer_shell;
 
 extern struct wl_buffer *buffer;
 extern struct wl_surface *surface;

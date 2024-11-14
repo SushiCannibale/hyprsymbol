@@ -1,10 +1,9 @@
 #include "globals.h"
 
-/* Gloal objects (singletons) */
 struct wl_compositor *glob_compositor             = NULL;
 struct wl_shm *glob_shm                           = NULL;
-/* Allows conversion from wl_surface into window */
-struct zwlr_layer_shell_v1 *glob_zwlr_layer_shell = NULL;
+/* Layered shell surface */
+struct zwlr_layer_shell_v1 *glob_layer_shell      = NULL;
 
 /* Client's objects */
 struct wl_buffer *buffer                          = NULL;
