@@ -17,7 +17,7 @@
 #include "../include/wlr-layer-shell-unstable-v1.h"
 #include <wayland-client.h>
 
-struct wl_buffer *create_shm_buffer(uint32_t **data, int width, int height) {
+struct wl_buffer *create_shm_buffer(int width, int height) {
 	int size = width * height * 4;
 	int stride = width * 4;
 
@@ -27,7 +27,7 @@ struct wl_buffer *create_shm_buffer(uint32_t **data, int width, int height) {
 		name[i] = (rand() % 10) + '0';
 	}
 
-	/* Opens a shared memory space through using the created file */
+	/* Opens a shared memory space using the created file */
 	int fd = shm_open(name, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IROTH | S_IWOTH);
 	if (fd < 0) {
 		return NULL;
@@ -36,7 +36,11 @@ struct wl_buffer *create_shm_buffer(uint32_t **data, int width, int height) {
 	shm_unlink(name);
 	ftruncate(fd, size);
 	
-	*data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	pixels = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (pixels == NULL) {
+		close(fd);
+		return NULL;
+	}
 	struct wl_shm_pool *pool = wl_shm_create_pool(glob_shm, fd, size);
 	struct wl_buffer *buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888);
 
@@ -44,6 +48,13 @@ struct wl_buffer *create_shm_buffer(uint32_t **data, int width, int height) {
 	close(fd);
 	
 	return buffer;
+}
+
+/**
+ * Writes some data to the shared memory object for the buffer to render.
+ */
+static void draw() {
+	memset(pixels, 0, 200 * 200 * 4);
 }
 
 int main() {
@@ -81,23 +92,19 @@ int main() {
 	/* Initial commit before surface attachment, as required */	
     wl_surface_commit(surface);
 
-   	/* TODO: move this in a proper event handler */
     while (wl_display_dispatch(display) != -1 && !configured) { }
 
 	/* Creates the buffer and attach it to the surface */
-    buffer = create_shm_buffer(&pixels, 200, 200);
+    buffer = create_shm_buffer(200, 200);
     if (buffer == NULL) {
     	return 1;
     }
 
-	/* Fills the buffer with something (just to see) */
-	memset(pixels, 0, 200 * 200 * 4);
-	for (int i, j = 0; i < 200 && j < 200; i++, j++) {
-		pixels[i+j] = 0xFF00FFFF;
-	}
+	draw();
 
+	/* Ask for rendering */
 	wl_surface_attach(surface, buffer, 0, 0);
-	wl_surface_damage(surface, 0, 0, 200, 200);
+	// wl_surface_damage(surface, 0, 0, 200, 200);
 	wl_surface_commit(surface);
 
 	while (wl_display_dispatch(display) != -1) { }
