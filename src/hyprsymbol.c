@@ -1,0 +1,1 @@
+#include "hyprsymbol.h"

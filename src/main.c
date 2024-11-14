@@ -10,14 +10,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "globals.h"
-#include "listeners.h"
+#include "hyprsymbol.h"
+#include "handlers.h"
 
 // #include "xdg-shell.h"
 #include "../include/wlr-layer-shell-unstable-v1.h"
 #include <wayland-client.h>
 
-struct wl_buffer *create_shm_buffer(int width, int height) {
+#define TITLE "UwU"
+
+struct wl_buffer *create_shm_buffer(struct client *client, int width, int height) {
 	int size = width * height * 4;
 	int stride = width * 4;
 
@@ -36,12 +38,12 @@ struct wl_buffer *create_shm_buffer(int width, int height) {
 	shm_unlink(name);
 	ftruncate(fd, size);
 	
-	pixels = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (pixels == NULL) {
+	client->pixels = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (client->pixels == NULL) {
 		close(fd);
 		return NULL;
 	}
-	struct wl_shm_pool *pool = wl_shm_create_pool(glob_shm, fd, size);
+	struct wl_shm_pool *pool = wl_shm_create_pool(client->shm, fd, size);
 	struct wl_buffer *buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888);
 
 	wl_shm_pool_destroy(pool);
@@ -53,66 +55,75 @@ struct wl_buffer *create_shm_buffer(int width, int height) {
 /**
  * Writes some data to the shared memory object for the buffer to render.
  */
-static void draw() {
-	memset(pixels, 0, 200 * 200 * 4);
+static void draw(struct client *client) {
+	memset(client->pixels, 0, 200 * 200 * 4);
 }
 
 int main() {
-    struct wl_display *display = wl_display_connect(NULL);
-	if (display == NULL) {
+	struct client client = { 0 };
+
+    client.display = wl_display_connect(NULL);
+	if (client.display == NULL) {
 		fprintf(stderr, "No display available");
-		return 1;
+		return EXIT_FAILURE;
 	}
 	
     /* Fetch the list of globals we are interested in */
-    struct wl_registry *registry = wl_display_get_registry(display);
-    wl_registry_add_listener(registry, &registry_listener, NULL);
-    wl_display_roundtrip(display);
+    client.registry = wl_display_get_registry(client.display);
+    wl_registry_add_listener(client.registry, &registry_listener, &client);
+    wl_display_roundtrip(client.display);
 
-    if (glob_compositor == NULL || glob_shm == NULL || glob_layer_shell == NULL) {
-		fprintf(stderr, "compositor, shm or zwlr_layer_shell global(s) undefined");
-    	return 1;
-    }
+	if (client.compositor == NULL) {
+		fprintf(stderr, "unable to bind to 'compositor'.");
+		return EXIT_FAILURE;
+	}
+
+	if (client.shm == NULL) {
+		fprintf(stderr, "unable to bind to 'shm'.");
+		return EXIT_FAILURE;
+	}
+
+	if (client.layer_shell == NULL) {
+		fprintf(stderr, "unable to bind to 'layer_shell'.");
+		return EXIT_FAILURE;
+	}
 
 	/* Requests a wl_surface and convert it to a layered surface */
-    surface = wl_compositor_create_surface(glob_compositor);
-    struct zwlr_layer_surface_v1 *zwlr_layer_surface = 
-	   	zwlr_layer_shell_v1_get_layer_surface(
-		   	glob_layer_shell,
-		   	surface,
+    client.surface = wl_compositor_create_surface(client.compositor);
+    client.layer_surface = zwlr_layer_shell_v1_get_layer_surface(
+			client.layer_shell,
+		   	client.surface,
 		   	NULL,
-		   	ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY,
-			"=UwU="
+		   	ZWLR_LAYER_SHELL_V1_LAYER_TOP,
+			TITLE
 		);
-	zwlr_layer_surface_v1_set_size(zwlr_layer_surface, 200, 200);
-	zwlr_layer_surface_v1_set_anchor(zwlr_layer_surface, 
+	zwlr_layer_surface_v1_set_size(client.layer_surface, 200, 200);
+	zwlr_layer_surface_v1_set_anchor(client.layer_surface, 
 		ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 
-    zwlr_layer_surface_v1_add_listener(zwlr_layer_surface, &zwlr_layer_surface_listener, NULL);
+    zwlr_layer_surface_v1_add_listener(client.layer_surface, &zwlr_layer_surface_listener, &client);
 	/* Initial commit before surface attachment, as required */	
-    wl_surface_commit(surface);
+    wl_surface_commit(client.surface);
 
-    while (wl_display_dispatch(display) != -1 && !configured) { }
+    while (wl_display_dispatch(client.display) != -1) { }
 
 	/* Creates the buffer and attach it to the surface */
-    buffer = create_shm_buffer(200, 200);
-    if (buffer == NULL) {
-    	return 1;
+    client.buffer = create_shm_buffer(&client, 200, 200);
+    if (client.buffer == NULL) {
+    	return EXIT_FAILURE;
     }
 
-	draw();
+	draw(&client);
 
 	/* Ask for rendering */
-	wl_surface_attach(surface, buffer, 0, 0);
+	wl_surface_attach(client.surface, client.buffer, 0, 0);
 	// wl_surface_damage(surface, 0, 0, 200, 200);
-	wl_surface_commit(surface);
+	wl_surface_commit(client.surface);
 
-	while (wl_display_dispatch(display) != -1) { }
+	while (wl_display_dispatch(client.display) != -1 && !client.configured) { }
 
-	// xdg_toplevel_destroy(xdg_toplevel);
-	// xdg_surface_destroy(xdg_surface);
-	zwlr_layer_surface_v1_destroy(zwlr_layer_surface);
-	wl_surface_destroy(surface);
-    wl_display_disconnect(display);
+	zwlr_layer_surface_v1_destroy(client.layer_surface);
+	wl_surface_destroy(client.surface);
+    wl_display_disconnect(client.display);
 	return 0;
 }

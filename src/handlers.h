@@ -4,6 +4,8 @@
 #include "../include/wlr-layer-shell-unstable-v1.h"
 #include <wayland-client.h>
 
+extern const struct wl_registry_listener registry_listener;
+
 void registry_global_handler
 (
     void *data,
@@ -20,6 +22,10 @@ void registry_global_remove_handler
     uint32_t name
 );
 
+/* ************************************************ */
+
+extern const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_listener;
+
 void zwlr_layer_surface_configure_handler
 (
 	void *data,
@@ -35,18 +41,6 @@ void zwlr_layer_surface_closed_handler
 	struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1
 );
 
-// void xdg_surface_configure_handler
-// (
-// 	void *data,
-// 	struct xdg_surface *xdg_surface,
-// 	uint32_t serial
-// );
-
-// void xdg_wm_base_ping_handler
-// (
-// 	void *data,
-// 	struct xdg_wm_base *xdg_wm_base,
-// 	uint32_t serial
-// );
+/* ************************************************ */
 
 #endif /* !HANDLERS_H */
