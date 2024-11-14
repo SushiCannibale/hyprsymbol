@@ -10,9 +10,11 @@ Hyprsymbol is a tool created to quickly copy-paste emojis and other unicode symb
 
 ## Roadmap
 - [ ] EGL / Cairo graphic design
-- [ ] 
-- [ ] Config file
-- [ ] Styling file (the most important)
+- [ ] Input handling
+    - [ ] Keyboard input
+    - [ ] Mouse input
+- [ ] Config
+- [ ] Styling (the most important)
 
 ## Contributing
 As always, feel free to fork the repo and open a pull request if you have any suggestion. Please keep in mind that I'm absolutely not an expert and mainly do this as myself to understand how the Wayland ecosystem functions.
