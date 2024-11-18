@@ -105,7 +105,7 @@ int main() {
 	/* Initial commit before surface attachment, as required */	
     wl_surface_commit(client.surface);
 
-    while (wl_display_dispatch(client.display) != -1) { }
+    while (wl_display_dispatch(client.display) != -1 && !client.configured) { }
 
 	/* Creates the buffer and attach it to the surface */
     client.buffer = create_shm_buffer(&client, 200, 200);
@@ -117,10 +117,10 @@ int main() {
 
 	/* Ask for rendering */
 	wl_surface_attach(client.surface, client.buffer, 0, 0);
-	// wl_surface_damage(surface, 0, 0, 200, 200);
+	wl_surface_damage(client.surface, 0, 0, 200, 200);
 	wl_surface_commit(client.surface);
 
-	while (wl_display_dispatch(client.display) != -1 && !client.configured) { }
+	while (wl_display_dispatch(client.display) != -1) { }
 
 	zwlr_layer_surface_v1_destroy(client.layer_surface);
 	wl_surface_destroy(client.surface);
