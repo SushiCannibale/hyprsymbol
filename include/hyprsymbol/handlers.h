@@ -43,6 +43,21 @@ void zwlr_layer_surface_closed_handler
 
 /* ************************************************ */
 
+extern const struct wl_callback_listener wl_surface_frame_listener;
+
+/**
+ * Asks the compositor for a new frame because the 
+ * current one is ready to be drawn
+ */
+void wl_surface_frame_done
+(
+    void *data, 
+    struct wl_callback *callback, 
+    uint32_t time
+);
+
+/* ************************************************ */
+
 extern const struct wl_shm_listener wl_shm_listener;
 
 void wl_shm_format_handler
