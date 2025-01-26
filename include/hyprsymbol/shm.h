@@ -6,12 +6,8 @@
 #include <hyprsymbol/hyprsymbol.h>
 
 /**
- * @brief Create a buffer from a shared memory pool and assign it to the client.
- * @param client 
- * @param width 
- * @param height 
- * @return int
+ * Create a buffer from a shared memory pool and assign it to the client.
  */
-int create_shm_buffer(struct client *client, int width, int height);
+int create_shm_buffer(struct client *client);
 
 #endif /* !SHM_H */

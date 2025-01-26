@@ -8,6 +8,9 @@
 #include <wlr-layer-shell-unstable-v1.h>
 
 struct client {
+    size_t width;
+    size_t height;
+
     struct wl_display *display;
     struct wl_registry *registry;
     struct wl_compositor *compositor;
@@ -40,5 +43,8 @@ struct client {
     cairo_surface_t *cairo_surface;
     // uint32_t format;
 };
+
+struct client *client_new(size_t width, size_t height);
+void client_free(struct client *client);
 
 #endif /* !HYPRSYMBOL_H */

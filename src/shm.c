@@ -53,9 +53,9 @@ static int allocate_shm_file(size_t size)
 	return fd;
 }
 
-int create_shm_buffer(struct client *client, int width, int height) {
-	size_t stride = width * 4; // ARGB - 4 bytes per pixel
-	size_t pool_size = stride * height;
+int create_shm_buffer(struct client *client) {
+	size_t stride = client->width * 4; // ARGB - 4 bytes per pixel
+	size_t pool_size = stride * client->height;
 	
 	int fd = allocate_shm_file(pool_size);
 	if (fd < 0) {
@@ -68,7 +68,7 @@ int create_shm_buffer(struct client *client, int width, int height) {
 		return 1;
 	}
 	struct wl_shm_pool *shm_pool = wl_shm_create_pool(client->shm, fd, pool_size);
-	client->shm_buffer = wl_shm_pool_create_buffer(shm_pool, 0, width, height, stride, WL_SHM_FORMAT_ARGB8888);
+	client->shm_buffer = wl_shm_pool_create_buffer(shm_pool, 0, client->width, client->height, stride, WL_SHM_FORMAT_ARGB8888);
 	wl_shm_pool_destroy(shm_pool);
 	return 0;
 }
