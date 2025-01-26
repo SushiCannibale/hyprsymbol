@@ -1,10 +1,10 @@
-#include "handlers.h"
+#include <hyprsymbol/handlers.h>
 
 #include <string.h>
 #include <wayland-client-protocol.h>
 #include <stdbool.h>
 
-#include "hyprsymbol.h"
+#include <hyprsymbol/hyprsymbol.h>
 
 const struct wl_registry_listener registry_listener = {
     .global = registry_global_handler,
@@ -53,12 +53,11 @@ void zwlr_layer_surface_configure_handler
 ) {
     struct client *client = data;
 	zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface, serial);
-    if (!client->configured) {
-        client->configured = true;
-    }
+    zwlr_layer_surface_v1_set_size(client->layer_surface, width, height);
+	zwlr_layer_surface_v1_set_anchor(client->layer_surface, 
+		ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 
     wl_surface_commit(client->surface);
-    /* TODO: Check if resizing is needed */
 }
 
 void zwlr_layer_surface_closed_handler
@@ -70,3 +69,17 @@ void zwlr_layer_surface_closed_handler
 }
 
 /* ************************************************ */
+
+const struct wl_shm_listener wl_shm_listener = {
+    .format = wl_shm_format_handler
+};
+
+void wl_shm_format_handler
+(
+	void *data,
+	struct wl_shm *wl_shm,
+	uint32_t format
+) {
+    // struct client *client = data;
+    // client->format = format;
+}

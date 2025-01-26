@@ -1,1 +1,2 @@
-#include "hyprsymbol.h"
+#include <hyprsymbol/hyprsymbol.h>
+

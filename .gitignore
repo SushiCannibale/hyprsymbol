@@ -1,6 +1,8 @@
 # Self-generated
-include/
 lib/
+protocols/
+build/
+.cache/
 
 # Prerequisites
 *.d

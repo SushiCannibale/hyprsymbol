@@ -1,65 +1,48 @@
 
-#define _POSIX_C_SOURCE 200112L
+#include <wayland-client-core.h>
+// #define _POSIX_C_SOURCE 200112L
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <unistd.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+#include <hyprsymbol/hyprsymbol.h>
+#include <hyprsymbol/handlers.h>
+#include <hyprsymbol/shm.h>
 
-#include "hyprsymbol.h"
-#include "handlers.h"
+// #include <wlr-layer-shell-unstable-v1.h>
+// #include <wayland-client.h>
+// #include <wayland-client-protocol.h>
 
-// #include "xdg-shell.h"
-#include "../include/wlr-layer-shell-unstable-v1.h"
-#include <wayland-client.h>
+#include <cairo/cairo.h>
 
-#define TITLE "UwU"
-
-struct wl_buffer *create_shm_buffer(struct client *client, int width, int height) {
-	int size = width * height * 4;
-	int stride = width * 4;
-
-	char name[] = "/hyprsymbol-XXXX";
-	size_t len = strlen(name);
-	for (int i = len-4; i < 4; i++) {
-		name[i] = (rand() % 10) + '0';
-	}
-
-	/* Opens a shared memory space using the created file */
-	int fd = shm_open(name, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IROTH | S_IWOTH);
-	if (fd < 0) {
-		return NULL;
-	}
-
-	shm_unlink(name);
-	ftruncate(fd, size);
-	
-	client->pixels = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (client->pixels == NULL) {
-		close(fd);
-		return NULL;
-	}
-	struct wl_shm_pool *pool = wl_shm_create_pool(client->shm, fd, size);
-	struct wl_buffer *buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888);
-
-	wl_shm_pool_destroy(pool);
-	close(fd);
-	
-	return buffer;
-}
+size_t WIDTH = 200;
+size_t HEIGHT = 200;
 
 /**
  * Writes some data to the shared memory object for the buffer to render.
  */
 static void draw(struct client *client) {
-	memset(client->pixels, 0, 200 * 200 * 4);
+	memset(client->shm_data, 100, 200 * 200 * 4);
+	// cairo_surface_t *surface = cairo_image_surface_create(
+    //     CAIRO_FORMAT_ARGB32, 200, 200);
+    // client->cairo = cairo_create(surface);
+
+    // cairo_select_font_face(client->cairo, "serif", CAIRO_FONT_SLANT_NORMAL,
+    //     CAIRO_FONT_WEIGHT_BOLD);
+    // cairo_set_font_size(client->cairo, 24.0);
+    // cairo_set_source_rgb(client->cairo, 0.0, 0.0, 1.0);
+    // cairo_move_to(client->cairo, 10.0, 50.0);
+    // cairo_show_text(client->cairo, "Hello, world!");
+
+    // cairo_destroy(client->cairo);
+    // cairo_surface_write_to_png(surface, "hello.png");
+    // cairo_surface_destroy(surface);
+    // return 0;
+	// memset(client->pixels, 0, 200 * 200 * 4);
 }
 
-int main() {
+int main(void) {
 	struct client client = { 0 };
 
     client.display = wl_display_connect(NULL);
@@ -88,37 +71,34 @@ int main() {
 		return EXIT_FAILURE;
 	}
 
-	/* Requests a wl_surface and convert it to a layered surface */
+	/* Requests a wl_surface */
     client.surface = wl_compositor_create_surface(client.compositor);
+
+	/* Give the surface a role */
     client.layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 			client.layer_shell,
 		   	client.surface,
 		   	NULL,
 		   	ZWLR_LAYER_SHELL_V1_LAYER_TOP,
-			TITLE
+			"Hyprsymbol"
 		);
-	zwlr_layer_surface_v1_set_size(client.layer_surface, 200, 200);
+	zwlr_layer_surface_v1_set_size(client.layer_surface, WIDTH, HEIGHT);
 	zwlr_layer_surface_v1_set_anchor(client.layer_surface, 
 		ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 
     zwlr_layer_surface_v1_add_listener(client.layer_surface, &zwlr_layer_surface_listener, &client);
+	wl_shm_add_listener(client.shm, &wl_shm_listener, &client);
 	/* Initial commit before surface attachment, as required */	
     wl_surface_commit(client.surface);
 
-    while (wl_display_dispatch(client.display) != -1 && !client.configured) { }
+    wl_display_dispatch(client.display);
 
 	/* Creates the buffer and attach it to the surface */
-    client.buffer = create_shm_buffer(&client, 200, 200);
-    if (client.buffer == NULL) {
-    	return EXIT_FAILURE;
-    }
+	create_shm_buffer(&client, WIDTH, HEIGHT);
+	wl_surface_attach(client.surface, client.shm_buffer, 0, 0);
+	wl_surface_commit(client.surface);
 
 	draw(&client);
-
-	/* Ask for rendering */
-	wl_surface_attach(client.surface, client.buffer, 0, 0);
-	wl_surface_damage(client.surface, 0, 0, 200, 200);
-	wl_surface_commit(client.surface);
 
 	while (wl_display_dispatch(client.display) != -1) { }
 

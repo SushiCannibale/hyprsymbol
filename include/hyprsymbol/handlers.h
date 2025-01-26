@@ -1,7 +1,7 @@
 #ifndef HANDLERS_H
 #define HANDLERS_H
 
-#include "../include/wlr-layer-shell-unstable-v1.h"
+#include <wlr-layer-shell-unstable-v1.h>
 #include <wayland-client.h>
 
 extern const struct wl_registry_listener registry_listener;
@@ -42,5 +42,14 @@ void zwlr_layer_surface_closed_handler
 );
 
 /* ************************************************ */
+
+extern const struct wl_shm_listener wl_shm_listener;
+
+void wl_shm_format_handler
+(
+	void *data,
+	struct wl_shm *wl_shm,
+	uint32_t format
+);
 
 #endif /* !HANDLERS_H */
