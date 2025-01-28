@@ -1,23 +1,21 @@
 
 #include <wayland-client-core.h>
-// #define _POSIX_C_SOURCE 200112L
+// #include <wlr-layer-shell-unstable-v1.h>
+// #include <wayland-client.h>
+// #include <wayland-client-protocol.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <hyprsymbol/hyprsymbol.h>
-#include <hyprsymbol/handlers.h>
 #include <hyprsymbol/shm.h>
 
-// #include <wlr-layer-shell-unstable-v1.h>
-// #include <wayland-client.h>
-// #include <wayland-client-protocol.h>
 #include <err.h>
 
 #include <hyprsymbol/renderer.h>
 
-static int setup_zwlr_surface(struct client *client) {
+static int create_surface_role(struct client *client) {
 	/* Give the surface a role */
     client->layer_surface = zwlr_layer_shell_v1_get_layer_surface(
 		client->layer_shell,
@@ -108,14 +106,17 @@ int main(void) {
 
 	connect_to_compositor(client);
     register_listeners(client);
-	create_surface(client);
-	setup_zwlr_surface(client);
 
-	
-	/* Initial commit before surface attachment, as required */	
-    wl_surface_commit(client->surface);
-
+	/* Binding is asynchronous. We need to wait for a response. */
     wl_display_dispatch(client->display);
+	wl_display_roundtrip(client->display);
+
+	create_surface(client);
+	create_surface_role(client);
+
+	/* Initial commit before surface attachment, as required */	
+    // wl_surface_commit(client->surface);
+
 
 	/* Creates the buffer and attach it to the surface */
 	create_shm_buffer(client);
@@ -124,17 +125,10 @@ int main(void) {
 
 	draw_frame(client);
 
-	while (wl_display_dispatch(client->display) != -1) { }
+	// while (wl_display_dispatch(client->display) != -1) { }
+	wl_display_dispatch(client->display);
+	wl_display_roundtrip(client->display);
 
-	zwlr_layer_surface_v1_destroy(client->layer_surface);
-	wl_surface_destroy(client->surface);
-    wl_display_disconnect(client->display);
-
-	_exit:
-	client_free(client);
+	client_destroy(client);
 	return 0;
-
-	_exit_fail:
-	client_free(client);
-	return EXIT_FAILURE;
 }

@@ -9,6 +9,21 @@
 #include <unistd.h>
 
 #include <wayland-client-protocol.h>
+#include <hyprsymbol/utils.h>
+
+const struct wl_shm_listener wl_shm_listener = {
+    .format = wl_shm_format_handler
+};
+
+void wl_shm_format_handler
+(
+	UNUSED void *data,
+	UNUSED struct wl_shm *wl_shm,
+	UNUSED uint32_t format
+) {
+    // struct client *client = data;
+    // client->format = format;
+}
 
 static void randname(char *buf)
 {

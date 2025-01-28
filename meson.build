@@ -28,8 +28,8 @@ executable(
 		'lib/wlr-layer-shell-unstable-v1.c',
 
 		'src/shm.c',
-		'src/handlers.c',
 		'src/hyprsymbol.c',
+		'src/renderer.c',
 
 		'src/main.c'
 	],

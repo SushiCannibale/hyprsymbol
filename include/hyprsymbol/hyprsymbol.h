@@ -45,6 +45,47 @@ struct client {
 };
 
 struct client *client_new(size_t width, size_t height);
-void client_free(struct client *client);
+void client_destroy(struct client *client);
+
+/* ************************************************ */
+
+extern const struct wl_registry_listener registry_listener;
+
+void registry_global_handler
+(
+    void *data,
+    struct wl_registry *registry,
+    uint32_t name,
+    const char *interface,
+    uint32_t version
+);
+
+void registry_global_remove_handler
+(
+    void *data,
+    struct wl_registry *registry,
+    uint32_t name
+);
+
+/* ************************************************ */
+
+extern const struct zwlr_layer_surface_v1_listener zwlr_layer_surface_listener;
+
+void zwlr_layer_surface_configure_handler
+(
+	void *data,
+	struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1,
+	uint32_t serial,
+	uint32_t width,
+	uint32_t height
+);
+
+void zwlr_layer_surface_closed_handler
+(
+	void *data,
+	struct zwlr_layer_surface_v1 *zwlr_layer_surface_v1
+);
+
+/* ************************************************ */
 
 #endif /* !HYPRSYMBOL_H */
