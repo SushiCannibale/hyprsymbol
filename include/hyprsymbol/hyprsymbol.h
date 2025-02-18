@@ -16,12 +16,14 @@ struct client {
     struct wl_compositor *compositor;
     struct wl_shm *shm;
 
+    int last_frame;
+    float offset;
+
     /**
      * @brief The pool of memory shared between the server and the client.
      * This is where all the pixel data is stored on the disk. 
      * The pool must be accessed through the usage of a wl_buffer, not directly
      */
-    // struct wl_shm_pool* shm_pool;
 
     /**
      * @brief The buffer used for the drawing operation.
@@ -36,7 +38,7 @@ struct client {
 
     struct zwlr_layer_shell_v1 *layer_shell;
     struct zwlr_layer_surface_v1 *layer_surface;
-    struct wl_surface *surface; // why do we have 2 surfaces ?
+    struct wl_surface *surface;
     int configured;
 
     cairo_t *cairo;

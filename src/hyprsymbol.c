@@ -48,7 +48,7 @@ void registry_global_handler
     } else if (strcmp(interface, wl_shm_interface.name) == 0) {
         client->shm = wl_registry_bind(registry, name, &wl_shm_interface, 1);
     } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
-        client->layer_shell = wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1);
+        client->layer_shell = wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 5);
     }
 }
 
@@ -57,7 +57,9 @@ void registry_global_remove_handler
     UNUSED void *data,
     UNUSED struct wl_registry *registry,
     UNUSED uint32_t name
-) { }
+) {
+    
+}
 
 /* ************************************************ */
 
@@ -75,11 +77,11 @@ void zwlr_layer_surface_configure_handler
 	uint32_t height
 ) {
     struct client *client = data;
-	zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface, serial);
     zwlr_layer_surface_v1_set_size(client->layer_surface, width, height);
 	zwlr_layer_surface_v1_set_anchor(client->layer_surface, 
 		ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 
+	zwlr_layer_surface_v1_ack_configure(zwlr_layer_surface, serial);
     wl_surface_commit(client->surface);
 }
 

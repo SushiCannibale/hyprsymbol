@@ -64,6 +64,7 @@ static int register_listeners(struct client *client) {
     client->registry = wl_display_get_registry(client->display);
     wl_registry_add_listener(client->registry, &registry_listener, client);
 
+	/* Binding is asynchronous. We need to wait for a response. */
 	wl_display_dispatch(client->display);
     wl_display_roundtrip(client->display);
 
@@ -107,27 +108,24 @@ int main(void) {
 	connect_to_compositor(client);
     register_listeners(client);
 
-	/* Binding is asynchronous. We need to wait for a response. */
-    wl_display_dispatch(client->display);
-	wl_display_roundtrip(client->display);
-
 	create_surface(client);
 	create_surface_role(client);
 
 	/* Initial commit before surface attachment, as required */	
-    // wl_surface_commit(client->surface);
-
+    wl_surface_commit(client->surface);
 
 	/* Creates the buffer and attach it to the surface */
 	create_shm_buffer(client);
+
+	wl_display_dispatch(client->display);
+	wl_display_roundtrip(client->display);
+
 	wl_surface_attach(client->surface, client->shm_buffer, 0, 0);
 	wl_surface_commit(client->surface);
 
 	draw_frame(client);
 
-	// while (wl_display_dispatch(client->display) != -1) { }
-	wl_display_dispatch(client->display);
-	wl_display_roundtrip(client->display);
+	while (wl_display_dispatch(client->display) != -1) { }
 
 	client_destroy(client);
 	return 0;
