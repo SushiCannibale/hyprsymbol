@@ -24,7 +24,7 @@ The list of steps I divided this projet into :
 #### Improvements
 + [ ] On-the-fly unicode symbols generation
 + [ ] Configuration file (on startup)
-+ [ ] Styling file
++ [ ] Styling file (CSS i guess)
 
 ## Contributing
 As always, feel free to fork the repo and open a pull request if you have any suggestion. Please keep in mind that I'm absolutely not an expert.
