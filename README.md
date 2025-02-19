@@ -11,9 +11,7 @@ Hyprsymbol is a tool created to quickly copy-paste emojis and other unicode symb
 The binary should be located under `build/hyprsymbol`
 
 ## Roadmap
-The list of steps I divided this projet into :
 
-### Step 1
 #### Cairo graphics
 + [ ] Display unicode symbols and other stuff in the shared buffer
 + [ ] Render unicode symbols
