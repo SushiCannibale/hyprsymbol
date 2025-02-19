@@ -37,4 +37,6 @@ As always, feel free to fork the repo and open a pull request if you have any su
 
 > [!TIP]
 > You can enable the debug mode by setting then environment variable `WAYLAND_DEBUG` to `1`
-> `WAYLAND_DEBUG=1 ./build/hyprsymbol`
+> ```sh 
+> $ WAYLAND_DEBUG=1 ./build/hyprsymbol
+> ```
