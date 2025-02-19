@@ -1,6 +1,7 @@
 #include <hyprsymbol/hyprsymbol.h>
 #include <hyprsymbol/shm.h>
 
+#include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -33,6 +34,14 @@ int create_shm_pool(struct client *client) {
 }
 
 int create_shm_buffer(struct client *client) {
-	client->shm_buffer = wl_shm_pool_create_buffer(client->shm_pool, 0, client->width, client->height, 4, WL_SHM_FORMAT_ARGB8888);
+	client->shm_buffer = wl_shm_pool_create_buffer(
+		client->shm_pool, 
+		0, 
+		client->width, 
+		client->height,
+		client->width * 4,
+		WL_SHM_FORMAT_ARGB8888
+	);
+	memset(client->pool_data, 0xFF, client->width * client->height * 4);
 	return 0;
 }

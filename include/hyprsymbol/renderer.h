@@ -3,12 +3,15 @@
 
 #include <hyprsymbol/hyprsymbol.h>
 
+/* Little endian */
 struct pixel {
-    unsigned char red;
-    unsigned char green;
     unsigned char blue;
+    unsigned char green;
+    unsigned char red;
     unsigned char alpha;
 };
+
+void set_rgb(struct pixel *pixel, unsigned char r, unsigned char g, unsigned char b);
 
 extern const struct wl_callback_listener wl_surface_frame_listener;
 

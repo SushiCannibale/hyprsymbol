@@ -36,8 +36,9 @@ struct client {
     size_t width;
     size_t height;
     unsigned char *pool_data;
-    // int last_frame;
-    // float offset;
+    
+    int last_frame;
+    float offset;
 
     /**
      * @brief The buffer used for the drawing operation.

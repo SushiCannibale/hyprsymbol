@@ -57,6 +57,12 @@ static int register_shm_listener(struct client *client) {
 	return 0;
 }
 
+static int register_first_frame_callback(struct client *client) {
+	struct wl_callback *callback = wl_surface_frame(client->wl_surface);
+	wl_callback_add_listener(callback, &wl_surface_frame_listener, client);
+	return 0;
+}
+
 static int create_surface(struct client *client) {
 	/* Requests a wl_surface */
     client->wl_surface = wl_compositor_create_surface(client->compositor);
@@ -120,21 +126,13 @@ int main(void) {
 
 	setup_zwlr_surface(client);
 
+	register_first_frame_callback(client);
+
 	/* Signal that the surface is ready to be configured */
     wl_surface_commit(client->wl_surface);
 
 	/* Ensures all the requests/events have been handled */
 	wl_display_roundtrip(client->display);
-
-	for (size_t x = 0; x < client->width; x++) {
-		for (size_t y = 0; y < client->height; y++) {
-			struct pixel *p = (struct pixel *)(client->pool_data + y*4 + x*4);
-			p->red = 255;
-			p->green = 0;
-			p->blue = 255;
-			p->alpha = 255;
-		}
-	}
 
 	/* Attaches the buffer freshly created from the pool 
 	(starting at (0, 0), it covers the whole shm pool) */
