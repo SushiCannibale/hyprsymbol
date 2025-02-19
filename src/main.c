@@ -1,4 +1,5 @@
 
+#include "wlr-layer-shell-unstable-v1.h"
 #include <wayland-client-core.h>
 // #include <wlr-layer-shell-unstable-v1.h>
 // #include <wayland-client.h>
@@ -14,85 +15,86 @@
 #include <err.h>
 
 #include <hyprsymbol/renderer.h>
+#include <wayland-client-protocol.h>
 
-static int create_surface_role(struct client *client) {
-	/* Give the surface a role */
-    client->layer_surface = zwlr_layer_shell_v1_get_layer_surface(
-		client->layer_shell,
-		client->surface,
-		NULL,
-		ZWLR_LAYER_SHELL_V1_LAYER_TOP,
-		"Hyprsymbol"
-	);
-	if (client->layer_surface == NULL) {
-		errx(1, "unable to get 'layer_surface'.");
-		return 1;
-	}
+static int setup_zwlr_surface(struct client *client) {
+	zwlr_layer_surface_v1_set_size(client->wl_surface_role, client->width, client->height);
+	zwlr_layer_surface_v1_set_anchor(client->wl_surface_role, ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+	return 0;
+}
 
-	zwlr_layer_surface_v1_set_size(
-		client->layer_surface,
-		client->width,
-		client->height
-	);
-	zwlr_layer_surface_v1_set_anchor(
-		client->layer_surface, 
-		ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT
-	);
-
-    zwlr_layer_surface_v1_add_listener(
-		client->layer_surface,
+static int register_zwlr_listener(struct client *client) {
+	zwlr_layer_surface_v1_add_listener(
+		client->wl_surface_role,
 		&zwlr_layer_surface_listener,
 		client
 	);
+	return 0;
+}
 
+static int create_surface_role(struct client *client) {
+    client->wl_surface_role = zwlr_layer_shell_v1_get_layer_surface(
+		client->zwlr_layer_shell,
+		client->wl_surface,
+		NULL,
+		ZWLR_LAYER_SHELL_V1_LAYER_TOP,
+		"hyprsymbol"
+	);
+	if (client->wl_surface_role == NULL) {
+		errx(1, "Can't get 'zwlr_surface_layer' role.");
+		return 1;
+	}
+
+	return 0;
+}
+
+static int register_shm_listener(struct client *client) {
+	wl_shm_add_listener(
+		client->wl_shm,
+	&wl_shm_listener,
+	client
+	);
 	return 0;
 }
 
 static int create_surface(struct client *client) {
 	/* Requests a wl_surface */
-    client->surface = wl_compositor_create_surface(client->compositor);
+    client->wl_surface = wl_compositor_create_surface(client->compositor);
 
-	if (client->surface == NULL) {
-		errx(1, "unable to bind 'surface'.");
+	if (client->wl_surface == NULL) {
+		errx(1, "Can't get 'surface' created.");
 		return 1;
 	}
 
 	return 0;
 }
 
-static int register_listeners(struct client *client) {
+static int register_globals(struct client *client) {
     client->registry = wl_display_get_registry(client->display);
     wl_registry_add_listener(client->registry, &registry_listener, client);
 
-	/* Binding is asynchronous. We need to wait for a response. */
-	wl_display_dispatch(client->display);
+	/* Wayland is asynchronous. We need to wait for the initial set of globals to appear */
     wl_display_roundtrip(client->display);
 
 	if (client->compositor == NULL) {
-		errx(1, "unable to bind 'compositor'.");
+		errx(1, "Can't get 'compositor' registry.");
 		return 1;
 	}
 
-	if (client->shm == NULL) {
-		errx(1, "unable to bind 'shm'.");
+	if (client->wl_shm == NULL) {
+		errx(1, "Can't get 'shm' registry.");
 		return 1;
 	}
 
-	if (client->layer_shell == NULL) {
-		errx(1, "unable to bind 'layer_shell'.");
+	if (client->zwlr_layer_shell == NULL) {
+		errx(1, "Can't get 'zwlr_layer_shell' registry.");
 		return 1;
 	}
-
-	wl_shm_add_listener(
-		client->shm,
-	&wl_shm_listener,
-	client
-	);
 
 	return 0;
 }
 
-static int connect_to_compositor(struct client *client) {
+static int client_connect(struct client *client) {
 	client->display = wl_display_connect(NULL);
 	if (client->display == NULL) {
 		fprintf(stderr, "No display available");
@@ -105,28 +107,46 @@ static int connect_to_compositor(struct client *client) {
 int main(void) {
 	struct client *client = client_new(200, 200);
 
-	connect_to_compositor(client);
-    register_listeners(client);
+	client_connect(client);
+    register_globals(client);
+
+	create_shm_pool(client);
+	create_shm_buffer(client);
+	register_shm_listener(client);
 
 	create_surface(client);
 	create_surface_role(client);
+	register_zwlr_listener(client);
 
-	/* Initial commit before surface attachment, as required */	
-    wl_surface_commit(client->surface);
+	setup_zwlr_surface(client);
 
-	/* Creates the buffer and attach it to the surface */
-	create_shm_buffer(client);
+	/* Signal that the surface is ready to be configured */
+    wl_surface_commit(client->wl_surface);
 
-	wl_display_dispatch(client->display);
+	/* Ensures all the requests/events have been handled */
 	wl_display_roundtrip(client->display);
 
-	wl_surface_attach(client->surface, client->shm_buffer, 0, 0);
-	wl_surface_commit(client->surface);
+	for (size_t x = 0; x < client->width; x++) {
+		for (size_t y = 0; y < client->height; y++) {
+			struct pixel *p = (struct pixel *)(client->pool_data + y*4 + x*4);
+			p->red = 255;
+			p->green = 0;
+			p->blue = 255;
+			p->alpha = 255;
+		}
+	}
 
-	draw_frame(client);
+	/* Attaches the buffer freshly created from the pool 
+	(starting at (0, 0), it covers the whole shm pool) */
+	wl_surface_attach(client->wl_surface, client->shm_buffer, 0, 0);
 
-	while (wl_display_dispatch(client->display) != -1) { }
+	// wl_surface_attach(client->wl_surface, client->shm_buffer, 0, 0);
+	wl_surface_commit(client->wl_surface);
 
-	client_destroy(client);
+	while (1) {
+		wl_display_dispatch(client->display);
+	}
+
+	// client_destroy(client);
 	return 0;
 }

@@ -2,7 +2,6 @@
 #include <hyprsymbol/utils.h>
 
 #include <stdio.h>
-#include <string.h>
 
 const struct wl_callback_listener wl_surface_frame_listener = {
 	.done = wl_surface_frame_done,
@@ -14,25 +13,25 @@ void wl_surface_frame_done
     UNUSED struct wl_callback *callback, 
     UNUSED uint32_t time
 ) {
-	/* Destroy this callback */
-	wl_callback_destroy(callback);
+	// /* Destroy this callback */
+	// wl_callback_destroy(callback);
 
-	/* Request another frame */
-	struct client *client = data;
-	callback = wl_surface_frame(client->surface);
-	wl_callback_add_listener(callback, &wl_surface_frame_listener, client);
+	// /* Request another frame */
+	// struct client *client = data;
+	// callback = wl_surface_frame(client->wl_surface);
+	// wl_callback_add_listener(callback, &wl_surface_frame_listener, client);
 
-	/* Update scroll amount at 24 pixels per second */
-	if (client->last_frame != 0) {
-		int elapsed = time - client->last_frame;
-		client->offset += elapsed / 1000.0 * 24;
-	}
+	// /* Update scroll amount at 24 pixels per second */
+	// if (client->last_frame != 0) {
+	// 	int elapsed = time - client->last_frame;
+	// 	client->offset += elapsed / 1000.0 * 24;
+	// }
 
-	/* Submit a frame for this event */
-	struct wl_buffer *buffer = draw_frame(client);
-	wl_surface_attach(client->surface, buffer, 0, 0);
-	wl_surface_damage_buffer(client->surface, 0, 0, INT32_MAX, INT32_MAX);
-	wl_surface_commit(client->surface);
+	// /* Submit a frame for this event */
+	// struct wl_buffer *buffer = draw_frame(client);
+	// wl_surface_attach(client->surface, buffer, 0, 0);
+	// wl_surface_damage_buffer(client->surface, 0, 0, INT32_MAX, INT32_MAX);
+	// wl_surface_commit(client->surface);
 
 	// client->last_frame = time;
 	printf("Received `wl_surface_frame_done` { time:%d }", time);
@@ -41,18 +40,20 @@ void wl_surface_frame_done
 /* ************************************************ */
 
 void draw_frame(struct client *client) {
-	int offset = (int)client->offset % 8;
- 	for (size_t y = 0; y < client->height; ++y) {
- 		for (size_t x = 0; x < client->width; ++x) {
-			if ((x + y / 8 * 8) % 16 < 8) {
-				if (((x + offset) + (y + offset) / 8 * 8) % 16 < 8) {
-					client->shm_data[y * client->width + x] = 0xFF666666;
-				} else {
-					client->shm_data[y * client->width + x] = 0xFFEEEEEE;
-				}
-			}
+	// int offset = (int)client->offset % 8;
+ 	// for (size_t y = 0; y < client->height; ++y) {
+ 	// 	for (size_t x = 0; x < client->width; ++x) {
+	// 		if ((x + y / 8 * 8) % 16 < 8) {
+	// 			if (((x + offset) + (y + offset) / 8 * 8) % 16 < 8) {
+	// 				client->shm_data[y * client->width + x] = 0xFF666666;
+	// 			} else {
+	// 				client->shm_data[y * client->width + x] = 0xFFEEEEEE;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
-	memset(client->shm_data, 100, 200 * 200 * 4);
+	// memset(client->shm_data, 100, 200 * 200 * 4);
     // cairo_surface_t *surface = cairo_image_surface_create(
     //     CAIRO_FORMAT_ARGB32, 200, 200);
     // client->cairo = cairo_create(surface);

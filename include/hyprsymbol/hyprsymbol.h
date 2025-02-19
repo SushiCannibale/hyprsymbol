@@ -8,22 +8,36 @@
 #include <wlr-layer-shell-unstable-v1.h>
 
 struct client {
-    size_t width;
-    size_t height;
-
     struct wl_display *display;
+
+    /* globals */
     struct wl_registry *registry;
     struct wl_compositor *compositor;
-    struct wl_shm *shm;
-
-    int last_frame;
-    float offset;
 
     /**
-     * @brief The pool of memory shared between the server and the client.
-     * This is where all the pixel data is stored on the disk. 
-     * The pool must be accessed through the usage of a wl_buffer, not directly
+     * @brief The registry for zwlr-relative events
+     * 
      */
+    struct zwlr_layer_shell_v1 *zwlr_layer_shell;
+
+    struct wl_shm *wl_shm;
+
+    /**
+     * @brief All the memory from which could be created buffers.
+     * The pool is mmaped both by the client and the server. Buffers are 
+     * therefore pointers to sections of this pool.
+     */
+    struct wl_shm_pool *shm_pool;
+
+    /* The role of the wl_surface */
+    struct zwlr_layer_surface_v1 *wl_surface_role;
+    struct wl_surface *wl_surface;
+
+    size_t width;
+    size_t height;
+    unsigned char *pool_data;
+    // int last_frame;
+    // float offset;
 
     /**
      * @brief The buffer used for the drawing operation.
@@ -31,23 +45,17 @@ struct client {
      * It is the object to which the client make rendering calls when necessary
      */
     struct wl_buffer *shm_buffer;
-    /**
-     * The mass of pixels available to the client
-     */
-    char *shm_data;
 
-    struct zwlr_layer_shell_v1 *layer_shell;
-    struct zwlr_layer_surface_v1 *layer_surface;
-    struct wl_surface *surface;
-    int configured;
+    // struct wl_surface *surface;
+    // int configured;
 
-    cairo_t *cairo;
-    cairo_surface_t *cairo_surface;
+    // cairo_t *cairo;
+    // cairo_surface_t *cairo_surface;
     // uint32_t format;
 };
 
 struct client *client_new(size_t width, size_t height);
-void client_destroy(struct client *client);
+// void client_destroy(struct client *client);
 
 /* ************************************************ */
 

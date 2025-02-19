@@ -3,6 +3,13 @@
 
 #include <hyprsymbol/hyprsymbol.h>
 
+struct pixel {
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
+    unsigned char alpha;
+};
+
 extern const struct wl_callback_listener wl_surface_frame_listener;
 
 /**

@@ -15,7 +15,12 @@ void wl_shm_format_handler
 );
 
 /**
- * Create a buffer from a shared memory pool and assign it to the client.
+ * @brief Creates the memory space that will be shared with the server.
+ */
+int create_shm_pool(struct client *client);
+
+/**
+ * @brief Creates a buffer from the pool
  */
 int create_shm_buffer(struct client *client);
 
