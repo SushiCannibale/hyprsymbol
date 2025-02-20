@@ -9,53 +9,32 @@
 
 struct client {
     struct wl_display *display;
-
-    /* globals */
-    struct wl_registry *registry;
     struct wl_compositor *compositor;
+    struct wl_registry *registry;
 
-    /**
-     * @brief The registry for zwlr-relative events
-     * 
-     */
+    /* ******************************* SURFACE ****************************** */
+    struct wl_surface *wl_surface;
+    struct zwlr_layer_surface_v1 *wl_surface_role;
     struct zwlr_layer_shell_v1 *zwlr_layer_shell;
 
+    /* ******************************* MEMORY ******************************* */
     struct wl_shm *wl_shm;
-
-    /**
-     * @brief All the memory from which could be created buffers.
-     * The pool is mmaped both by the client and the server. Buffers are 
-     * therefore pointers to sections of this pool.
-     */
     struct wl_shm_pool *shm_pool;
-
-    /* The role of the wl_surface */
-    struct zwlr_layer_surface_v1 *wl_surface_role;
-    struct wl_surface *wl_surface;
-
-    size_t width;
-    size_t height;
-    unsigned char *pool_data;
-    
-    int last_frame;
-    float offset;
-
-    /**
-     * @brief The buffer used for the drawing operation.
-     * Buffer issued from the shared memory pool.
-     * It is the object to which the client make rendering calls when necessary
-     */
     struct wl_buffer *shm_buffer;
+    unsigned char *pool_data;
 
-    // struct wl_surface *surface;
-    // int configured;
+    /* ****************************** RENDERING ***************************** */
+    cairo_t *cr;
+    cairo_surface_t *cr_surface;
 
-    // cairo_t *cairo;
-    // cairo_surface_t *cairo_surface;
-    // uint32_t format;
+    /* ******************************* OTHERS ******************************* */
+    int width;
+    int height;
+    float offset;
+    int last_frame;
 };
 
-struct client *client_new(size_t width, size_t height);
+struct client *client_new(int width, int height);
 // void client_destroy(struct client *client);
 
 /* ************************************************ */

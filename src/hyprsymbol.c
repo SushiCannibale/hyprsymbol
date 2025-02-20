@@ -7,7 +7,7 @@
 #include <string.h>
 #include <sys/mman.h>
 
-struct client *client_new(size_t width, size_t height) {
+struct client *client_new(int width, int height) {
     struct client *client = calloc(1, sizeof(*client));
     client->width = width;
     client->height = height;

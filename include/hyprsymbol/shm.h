@@ -14,14 +14,8 @@ void wl_shm_format_handler
 	uint32_t format
 );
 
-/**
- * @brief Creates the memory space that will be shared with the server.
- */
 int create_shm_pool(struct client *client);
 
-/**
- * @brief Creates a buffer from the pool
- */
 int create_shm_buffer(struct client *client);
 
 #endif /* !SHM_H */

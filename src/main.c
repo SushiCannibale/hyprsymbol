@@ -1,9 +1,6 @@
 
 #include "wlr-layer-shell-unstable-v1.h"
 #include <wayland-client-core.h>
-// #include <wlr-layer-shell-unstable-v1.h>
-// #include <wayland-client.h>
-// #include <wayland-client-protocol.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -127,6 +124,7 @@ int main(void) {
 	setup_zwlr_surface(client);
 
 	register_first_frame_callback(client);
+	setup_renderer(client);
 
 	/* Signal that the surface is ready to be configured */
     wl_surface_commit(client->wl_surface);

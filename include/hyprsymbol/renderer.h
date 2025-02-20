@@ -3,22 +3,8 @@
 
 #include <hyprsymbol/hyprsymbol.h>
 
-/* Little endian */
-struct pixel {
-    unsigned char blue;
-    unsigned char green;
-    unsigned char red;
-    unsigned char alpha;
-};
-
-void set_rgb(struct pixel *pixel, unsigned char r, unsigned char g, unsigned char b);
-
 extern const struct wl_callback_listener wl_surface_frame_listener;
 
-/**
- * Asks the compositor for a new frame because the 
- * current one is ready to be drawn
- */
 void wl_surface_frame_done
 (
     void *data, 
@@ -26,8 +12,8 @@ void wl_surface_frame_done
     uint32_t time
 );
 
-// Everything that is about cairo and rendering / drawing should be done here.
-// we'll use frame callbacks to know when to draw on the surface.
+void setup_renderer(struct client *client);
+
 void draw_frame(struct client *client);
 
 #endif /* !RENDERER_H */

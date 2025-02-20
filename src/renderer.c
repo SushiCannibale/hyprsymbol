@@ -1,3 +1,4 @@
+#include "cairo.h"
 #include <hyprsymbol/renderer.h>
 #include <hyprsymbol/utils.h>
 
@@ -38,42 +39,26 @@ void wl_surface_frame_done
 
 /* ************************************************ */
 
-void set_rgb(struct pixel *pixel, unsigned char r, unsigned char g, unsigned char b) {
-	pixel->alpha = 0xFF;
-	pixel->red = r;
-	pixel->green = g;
-	pixel->blue = b;
+void setup_renderer(struct client *client) {
+	client->cr_surface = cairo_image_surface_create_for_data(
+		client->pool_data, 
+		CAIRO_FORMAT_ARGB32, 
+			client->width, 
+		client->height, 
+		client->width * 4);
+	client->cr = cairo_create(client->cr_surface);
 }
 
 void draw_frame(struct client *client) {
-	int offset = (int)client->offset % 8;
- 	for (size_t y = 0; y < client->height; ++y) {
- 		for (size_t x = 0; x < client->width; ++x) {
-			struct pixel *pixel = (struct pixel *)(client->pool_data + y*4*client->width + x * 4);
+	double w = (double)client->width;
+	double h = (double)client->height;
+	cairo_t *cr = client->cr;
 
-			if (((x + offset) + (y + offset) / 8 * 8) % 16 < 8) {
-				set_rgb(pixel, 0x66, 0x66, 0x66);
- 			} else {
-				set_rgb(pixel, 0xEE, 0xEE, 0xEE);
-			}
-		}
-	}
-
-	// memset(client->shm_data, 100, 200 * 200 * 4);
-    // cairo_surface_t *surface = cairo_image_surface_create(
-    //     CAIRO_FORMAT_ARGB32, 200, 200);
-    // client->cairo = cairo_create(surface);
-
-    // cairo_select_font_face(client->cairo, "serif", CAIRO_FONT_SLANT_NORMAL,
-    //     CAIRO_FONT_WEIGHT_BOLD);
-    // cairo_set_font_size(client->cairo, 24.0);
-    // cairo_set_source_rgb(client->cairo, 0.0, 0.0, 1.0);
-    // cairo_move_to(client->cairo, 10.0, 50.0);
-    // cairo_show_text(client->cairo, "Hello, world!");
-
-    // cairo_destroy(client->cairo);
-    // cairo_surface_write_to_png(surface, "hello.png");
-    // cairo_surface_destroy(surface);
-    // return 0;
-	// memset(client->pixels, 0, 200 * 200 * 4);
+	cairo_set_source_rgb(cr, 0, 0, 0);
+	cairo_move_to(cr, 0, 0);
+	cairo_line_to(cr, w, h);
+	cairo_move_to(cr, w, 0);
+	cairo_line_to(cr, 0, h);
+	cairo_set_line_width(cr, 5);
+	cairo_stroke(cr);
 }
