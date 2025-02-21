@@ -1,8 +1,11 @@
 #include "cairo.h"
+#include "pango/pango-layout.h"
+#include "pango/pango-types.h"
 #include <hyprsymbol/renderer.h>
 #include <hyprsymbol/utils.h>
-
 #include <stdio.h>
+
+#include <pango/pangocairo.h>
 
 const struct wl_callback_listener wl_surface_frame_listener = {
 	.done = wl_surface_frame_done,
@@ -50,15 +53,21 @@ void setup_renderer(struct client *client) {
 }
 
 void draw_frame(struct client *client) {
-	double w = (double)client->width;
-	double h = (double)client->height;
-	cairo_t *cr = client->cr;
+	int w = client->width;
+	int h = client->height;
 
-	cairo_set_source_rgb(cr, 0, 0, 0);
-	cairo_move_to(cr, 0, 0);
-	cairo_line_to(cr, w, h);
-	cairo_move_to(cr, w, 0);
-	cairo_line_to(cr, 0, h);
-	cairo_set_line_width(cr, 5);
-	cairo_stroke(cr);
+	cairo_t *cr = client->cr;
+	// cairo_text_extents_t te;
+	// cairo_font_extents_t fe;
+
+	// cairo_font_extents(cr, &fe);
+	// cairo_select_font_face(cr, "JetBrainsMonoNerdFont-Regular", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	PangoLayout *pl = pango_cairo_create_layout(cr);
+
+	cairo_set_source_rgb(cr, 0x0, 0, 0);
+	pango_layout_set_text(pl, "😀", -1);
+	pango_layout_get_size(pl, &w, &h);
+	cairo_move_to(cr, (w / PANGO_SCALE) / 2, (h / PANGO_SCALE) / 2);
+
+	pango_cairo_show_layout(cr, pl);
 }

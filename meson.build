@@ -34,7 +34,7 @@ executable(
 		'src/main.c'
 	],
 	include_directories: public_headers + private_headers,
-    dependencies : [ dependency('cairo'), dependency('wayland-client') ],
+    dependencies : [ dependency('pangocairo'), dependency('cairo'), dependency('wayland-client') ],
     install : true,
 )
 
